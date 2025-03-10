@@ -1,7 +1,7 @@
 import React from "react";
 const Navbar = () => {
   return (
-    <nav className="bg-white min-w-[88vw] mx-auto right-[7vw] flex justify-between items-center  fixed top-12 rounded-full px-5 py-2 z-50">
+    <nav className="bg-white min-w-[88vw] mx-auto right-[7vw] flex justify-between items-center  fixed top-12 rounded-full px-5 py-3 z-50">
       <div className="logo flex justify-between items-center space-x-15">
         <svg
           className="h-6 px-2"
@@ -20,9 +20,9 @@ const Navbar = () => {
         </ul>
      
       </div>
-      <div className="flex gap-8">
-          <button className="login bg-gray-300 p-6 font-bold  rounded-3xl">Log in</button>
-          <button className="signup bg-gray-900 p-6 rounded-full text-white">Sign up free</button>
+      <div className="flex gap-4">
+          <button className="login bg-gray-300 p-5 font-bold  rounded-3xl">Log in</button>
+          <button className="signup bg-gray-900 p-5 font-bold rounded-full text-white">Sign up free</button>
         </div>
     </nav>
   );
