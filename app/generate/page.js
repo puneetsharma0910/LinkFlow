@@ -2,34 +2,60 @@
 
 import React from "react";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { ToastContainer, toast } from "react-toastify";
 
 const Generate = () => {
-  const [link, setlink] = useState("");
-  const [linktext, setlinktext] = useState("");
-  const [handle, sethandle] = useState("");
-  const [pic, setpic] = useState("")
-  const addLink = async (text, link, handle) => {
+  // const [link, setlink] = useState("");
+  // const [linktext, setlinktext] = useState("");
+  const searchParams = useSearchParams();
+  const [links, setLinks] = useState([{ link: "", linktext: "" }]);
+  const [handle, setHandle] = useState(searchParams.get('handle'));
+  const [pic, setpic] = useState("");
+  const [desc, setdesc] = useState("")
+  const handleChange = (index, link, linktext) => {
+    setLinks((prevLinks) =>
+      prevLinks.map((item, i) => (i === index ? { link, linktext } : item))
+    );
+  };
+  const addLink = () => {
+    setLinks(links.concat([{ link: "", linktext: "" }]));
+  };
+
+  const submitlinks = async () => {
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
 
     const raw = JSON.stringify({
-      link: text,
-      linktext: link,
-      handle: handle,
+      "links": links, 
+      "handle": handle,
+      "pic": pic,
+      "desc":desc
     });
+
+    console.log(raw)
 
     const requestOptions = {
       method: "POST",
       headers: myHeaders,
       body: raw,
-      redirect: "follow",
+      redirect: "follow"
     };
 
-    const r = await fetch("http://localhost:3000/api/add", requestOptions);
-    const result = await r.json();
-    toast(result.message);
+   const r = await fetch("http://localhost:3000/api/add", requestOptions)
+   const result = await r.json()
+   if(result.success){ 
+     toast.success(result.message)
+     setLinks([])
+     setpic("")
+     setHandle("")
+     setdesc("")
+    }
+    else{
+      toast.error(result.message)
+    }
+ 
   };
   return (
     <div className="generate grid grid-cols-2 bg-[#f1f1ea] ">
@@ -42,8 +68,8 @@ const Generate = () => {
             <h2 className="font-semibold">Step 1: Claim your Handle</h2>
             <div className="mx-4">
               <input
-                value={handle}
-                onChange={(e) => sethandle(e.target.value)}
+                value={handle || ""}
+                onChange={(e) => setHandle(e.target.value)}
                 className="bg-neutral-200 rounded-full px-3 py-2"
                 type="text"
                 placeholder="Enter your handle"
@@ -53,42 +79,67 @@ const Generate = () => {
 
           <div className="item ">
             <h2 className="font-semibold">Step 2: Add Links</h2>
-            <div className="mx-4 flex gap-2">
-              <input
-                 value={linktext}
-                 onChange={(e) => setlinktext(e.target.value)}
-                className="bg-neutral-200 rounded-full px-3 py-2 "
-                type="text"
-                placeholder="Enter Link text"
-              />
-              <input
-                 value={link}
-                 onChange={(e) => setlink(e.target.value)}
-                className="bg-neutral-200 rounded-full px-3 py-2"
-                type="text"
-                placeholder="Enter Link"
-              />
-              <button 
-              onClick={()=>addLink(linktext,link,handle)}
-              className="bg-[#225abf] hover:bg-blue-700 text-white font-bold rounded-4xl p-2">
-                Add Link
-              </button>
-            </div>
+            {links &&
+              links.map((item, index) => {
+                return (
+                  <div key={index} className="mx-4 flex gap-2">
+                    <input
+                      value={item.linktext || ""}
+                      onChange={(e) =>
+                        handleChange(index, item.link, e.target.value)
+                      }
+                      className="bg-neutral-200 rounded-full px-3 py-2 mt-1"
+                      type="text"
+                      placeholder="Enter Link text"
+                    />
+                    <input
+                      value={item.link || ""}
+                      onChange={(e) =>
+                        handleChange(index, e.target.value, item.linktext)
+                      }
+                      className="bg-neutral-200 rounded-full px-3 py-2 mt-1"
+                      type="text"
+                      placeholder="Enter Link"
+                    />
+                  </div>
+                );
+              })}
+            <button
+              onClick={() => addLink()}
+              className="bg-[#225abf] hover:bg-blue-700 text-white font-bold mt-1 rounded-4xl p-2"
+            >
+              + Add Link
+            </button>
           </div>
 
           <div className="item ">
-            <h2 className="font-semibold">Step 3: Add picture and finalise</h2>
+            <h2 className="font-semibold">Step 3: Add picture and description</h2>
             <div className="mx-4">
               <input
-                 value={pic}
-                 onChange={(e) => setpic(e.target.value)}
+                value={pic}
+                onChange={(e) => setpic(e.target.value)}
                 className="bg-neutral-200 rounded-full w-3/4 px-3  py-2 "
                 type="text"
                 placeholder="Enter Link to your picture"
               />
             </div>
+            <div className="mx-4 mt-2">
+              <input
+                value={desc}
+                onChange={(e) => setdesc(e.target.value)}
+                className="bg-neutral-200 rounded-full w-3/4 px-3  py-2 "
+                type="text"
+                placeholder="Enter description"
+              />
+            </div>
           </div>
-          <button className="bg-[#225abf] w-1/3 hover:bg-blue-700 text-white font-bold rounded-4xl p-2 mt-5">
+          <button
+            disabled={pic == "" || handle == "" || desc =="" || links[0].linktext == ""}
+            onClick={() => {
+              submitlinks();
+            }}
+            className="bg-[#225abf] w-1/3 disabled:bg-[#6590e0] hover:bg-blue-700 text-white font-bold rounded-4xl p-2 mt-5"
+          >
             Create your FlowLink
           </button>
         </div>
